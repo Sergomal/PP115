@@ -25,39 +25,55 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
-        session.getEntityManagerFactory();
-        Transaction transaction = session.getTransaction();
-        transaction.begin();
+        try {
+            session.getEntityManagerFactory();
+            Transaction transaction = session.getTransaction();
+            transaction.begin();
 
-        String sql = """
-                CREATE TABLE IF NOT EXISTS users (
-                  id INT NOT NULL AUTO_INCREMENT,
-                  name VARCHAR(45) NOT NULL,
-                  lastName VARCHAR(45) NOT NULL,
-                  age INT NOT NULL,
-                  PRIMARY KEY (id))
-                ENGINE = InnoDB
-                DEFAULT CHARACTER SET = utf8;""";
+            String sql = """
+                    CREATE TABLE IF NOT EXISTS users (
+                      id INT NOT NULL AUTO_INCREMENT,
+                      name VARCHAR(45) NOT NULL,
+                      lastName VARCHAR(45) NOT NULL,
+                      age INT NOT NULL,
+                      PRIMARY KEY (id))
+                    ENGINE = InnoDB
+                    DEFAULT CHARACTER SET = utf8;""";
 
-        Query query = session.createSQLQuery(sql);
-        query.executeUpdate();
-        transaction.commit();
-        session.close();
+            Query query = session.createSQLQuery(sql);
+            query.executeUpdate();
+            transaction.commit();
+
+        } catch (HibernateException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
 
     }
 
     @Override //OK
     public void dropUsersTable() {
-        Session session = getSessionFactory().openSession();
-        session.getEntityManagerFactory();
-        Transaction transaction = session.beginTransaction();
+        try {
+            Session session = getSessionFactory().openSession();
+            session.getEntityManagerFactory();
+            Transaction transaction = session.beginTransaction();
 
-        String sql = "DROP TABLE IF EXISTS users";
+            String sql = "DROP TABLE IF EXISTS users";
 
-        Query query = session.createSQLQuery(sql).addEntity(User.class);
-        query.executeUpdate();
-        transaction.commit();
-        session.close();
+            Query query = session.createSQLQuery(sql).addEntity(User.class);
+            query.executeUpdate();
+            transaction.commit();
+
+        } catch (HibernateException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
 
     }
 
